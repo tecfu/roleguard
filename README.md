@@ -41,7 +41,24 @@ const can = abilities.can('update', 'chat', ['user'], {
       }
     }
   })
-console.log(can)```
+console.log(can)
+
+//{
+//  can: true,
+//  message: 'user can update chat subject to rule condition',
+//  rule: {
+//    resource: 'chat',
+//    actions: [ 'update' ],
+//    condition: '(ctx) => {\n' +
+//      '          return ctx.request.body.id === ctx.state.jwt.sub.id\n' +
+//      '        }'
+//  },
+//  roles: [ 'user' ],
+//  requestedAction: 'update',
+//  requestedResource: 'chat'
+//}
+
+```
 
 ## Test
 

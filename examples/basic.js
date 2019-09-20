@@ -1,4 +1,4 @@
-const RoleGuard = require(__dirname+'/dist/cjs.js');
+const RoleGuard = require(__dirname+'/../dist/cjs.js');
 
 const AbilityMap = {
   user: {
