@@ -1,0 +1,36 @@
+{
+  "name": "@tecfu/roleguard",
+  "version": "0.0.1",
+  "description": "An agnostic RBAC library with explanatory decision messages.",
+  "main": "dist/cjs.js",
+  "module": "src/main.js",
+  "scripts": {
+    "build": "npx rollup --config",
+    "test": "./node_modules/mocha/bin/mocha",
+    "save-test": "./node_modules/mocha/bin/mocha --save",
+    "display-test": "./node_modules/mocha/bin/mocha --display"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tecfu/roleguard.git"
+  },
+  "keywords": [
+    "\"RBAC\"",
+    "\"Authorization",
+    "Library\"",
+    "\"Auth\"",
+    "\"ACL\""
+  ],
+  "author": "tecfu",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/tecfu/roleguard/issues"
+  },
+  "homepage": "https://github.com/tecfu/roleguard#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "rollup": "^1.21.4"
+  }
+}

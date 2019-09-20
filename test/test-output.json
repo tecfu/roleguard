@@ -1,0 +1,99 @@
+[
+  {
+    "can": false,
+    "message": "not authorized to read video",
+    "rule": null,
+    "roles": [
+      "public"
+    ],
+    "requestedAction": "read",
+    "requestedResource": "video"
+  },
+  {
+    "can": true,
+    "message": "subscriber can read video",
+    "rule": {
+      "resource": "video",
+      "actions": [
+        "read"
+      ]
+    },
+    "roles": [
+      "subscriber"
+    ],
+    "requestedAction": "read",
+    "requestedResource": "video"
+  },
+  {
+    "can": false,
+    "message": "not authorized to update video",
+    "rule": null,
+    "roles": [
+      "user"
+    ],
+    "requestedAction": "update",
+    "requestedResource": "video"
+  },
+  {
+    "can": true,
+    "message": "user can update video subject to rule condition",
+    "rule": {
+      "resource": "video",
+      "actions": [
+        "update",
+        "create",
+        "delete"
+      ],
+      "condition": "(ctx) => {\n          return ctx.request.body.id === ctx.state.jwt.sub.id\n        }"
+    },
+    "roles": [
+      "user"
+    ],
+    "requestedAction": "update",
+    "requestedResource": "video"
+  },
+  {
+    "can": false,
+    "message": "banned cannot read video",
+    "rule": {
+      "resource": "video",
+      "actions": [
+        "read"
+      ]
+    },
+    "roles": [
+      "user",
+      "subscriber",
+      "banned"
+    ],
+    "requestedAction": "read",
+    "requestedResource": "video"
+  },
+  {
+    "can": false,
+    "message": "not authorized to read promo66",
+    "rule": null,
+    "roles": [
+      "user",
+      "subscriber",
+      "banned"
+    ],
+    "requestedAction": "read",
+    "requestedResource": "promo66"
+  },
+  {
+    "can": true,
+    "message": "promo66 can read promo66",
+    "rule": {
+      "resource": "promo66",
+      "actions": [
+        "read"
+      ]
+    },
+    "roles": [
+      "promo66"
+    ],
+    "requestedAction": "read",
+    "requestedResource": "promo66"
+  }
+]
