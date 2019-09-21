@@ -13,10 +13,12 @@
     "can": true,
     "message": "subscriber can read video",
     "rule": {
-      "resource": "video",
-      "actions": [
-        "read"
-      ]
+      "can": {
+        "resource": "video",
+        "actions": [
+          "read"
+        ]
+      }
     },
     "roles": [
       "subscriber"
@@ -38,13 +40,15 @@
     "can": true,
     "message": "user can update video subject to rule condition",
     "rule": {
-      "resource": "video",
-      "actions": [
-        "update",
-        "create",
-        "delete"
-      ],
-      "condition": "(ctx) => {\n          return ctx.request.body.id === ctx.state.jwt.sub.id\n        }"
+      "can": {
+        "resource": "video",
+        "actions": [
+          "update",
+          "create",
+          "delete"
+        ],
+        "condition": "(ctx) => {\n          return ctx.request.body.id === ctx.state.jwt.sub.id\n        }"
+      }
     },
     "roles": [
       "user"
@@ -56,10 +60,12 @@
     "can": false,
     "message": "banned cannot read video",
     "rule": {
-      "resource": "video",
-      "actions": [
-        "read"
-      ]
+      "cannot": {
+        "resource": "video",
+        "actions": [
+          "read"
+        ]
+      }
     },
     "roles": [
       "user",
@@ -85,10 +91,12 @@
     "can": true,
     "message": "promo66 can read promo66",
     "rule": {
-      "resource": "promo66",
-      "actions": [
-        "read"
-      ]
+      "can": {
+        "resource": "promo66",
+        "actions": [
+          "read"
+        ]
+      }
     },
     "roles": [
       "promo66"

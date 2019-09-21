@@ -91,8 +91,9 @@ class VerboseMode extends Base {
     if (output !== undefined) {
       result.can = true
       result.message = (output.hasOwnProperty('condition')) ? `${request} subject to rule condition` : request
-      result.rule = output
-      if(output.hasOwnProperty('condition')) result.rule.condition = `${output.condition.toString()}`
+      result.rule = {}
+      result.rule[ability] = output
+      if(output.hasOwnProperty('condition')) result.rule[ability].condition = `${output.condition.toString()}`
     }
 
     return result
