@@ -5,12 +5,18 @@ A role based acess control library that includes some extra features I couldn't 
 - Add a conditional validation constraint, to an access rule
 - See which rule resulted in a positive match
 
-Example:
+## Install
 
 ```js
-const RoleGuard = require('roleguard')
+npm install https://github.com/tecfu/roleguard.git
+```
+
+### Usage
+
+```js
+const RoleGuard = require('@tecfu/roleguard')
 // or as ES6 module use
-// import RoleGuard from 'roleguard'
+// import RoleGuard from '@tecfu/roleguard'
 const AbilityMap = {
   user: {
     can: [
