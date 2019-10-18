@@ -1,9 +1,10 @@
 # Roleguard
 
-A role based acess control library that includes some extra features I couldn't find elsewhere:
+A role based access control library with some unconventional options:
 
-- Add a conditional validation constraint, to an access rule
-- See which rule resulted in a positive match
+- Add a conditional validation constraint to an access rule (facilitates more specificitiy than packages that limit access to roles and their granted actions).
+
+- Report which rule granted access.
 
 ## Install
 
@@ -11,20 +12,21 @@ A role based acess control library that includes some extra features I couldn't 
 npm install https://github.com/tecfu/roleguard.git
 ```
 
-### Usage
+### Example
 
 ```js
 const RoleGuard = require('@tecfu/roleguard')
 // or as ES6 module use
 // import RoleGuard from '@tecfu/roleguard'
-const AbilityMap = {
+
+const AccessRules = {
   user: {
     can: [
-      { resource: 'chat', actions: ['read'] },
       {
         resource: 'chat',
         actions: ['update'],
         condition: (ctx) => {
+          // rule will only positive match if function returns boolean `true`
           return ctx.request.body.id === ctx.state.jwt.sub.id
         }
       }
@@ -32,22 +34,23 @@ const AbilityMap = {
   }
 }
 
-const abilities = RoleGuard(AbilityMap)
-const can = abilities.can('update', 'chat', ['user'], {
-    request: {
-      body: {
+const abilities = RoleGuard(AccessRules)
+const ctx = {
+  request: {
+    body: {
+      id: 2
+    }
+  },
+  state: {
+    jwt: {
+      sub: {
         id: 2
       }
-    },
-    state: {
-      jwt: {
-        sub: {
-          id: 2
-        }
-      }
     }
-  })
-console.log(can)
+  }
+}
+const test = abilities.can('update', 'chat', ['user'], ctx)
+console.log(test)
 
 //{
 //  can: true,
