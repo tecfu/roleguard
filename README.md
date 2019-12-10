@@ -2,7 +2,7 @@
 
 A role based access control library with some unconventional options:
 
-- Add a conditional validation constraint to an access rule (facilitates more specificitiy than packages that limit access to roles and their granted actions).
+- Add a conditional validation constraint to an access rule (facilitates more specificity than packages that limit access to roles and their granted actions).
 
 - Report which rule granted access.
 
