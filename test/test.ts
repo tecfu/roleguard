@@ -1,16 +1,14 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import RoleGuard, { type AbilityMap } from "../src/main.js"
+import RoleGuard, { type AbilityMap } from "../src/main.ts"
 
 type Context = { request?: { body?: { id?: number } }; state?: { jwt?: { sub?: { id?: number } } } }
 
 const abilityMap: AbilityMap<Context> = {
-  user: {
-    can: [
-      { resource: "video", actions: ["read"] },
-      { resource: "video", actions: ["update", "create", "delete"], condition: (ctx) => ctx.request?.body?.id === ctx.state?.jwt?.sub?.id }
-    ]
-  },
+  user: { can: [
+    { resource: "video", actions: ["read"] },
+    { resource: "video", actions: ["update", "create", "delete"], condition: (ctx) => ctx.request?.body?.id === ctx.state?.jwt?.sub?.id }
+  ] },
   banned: { cannot: [{ resource: "video", actions: ["read"] }] },
   subscriber: { can: [{ resource: "video", actions: ["read"] }] },
   promo66: { can: [{ resource: "promo66", actions: ["read"] }] }
@@ -58,7 +56,7 @@ test("unknown and inherited role names cannot authorize access", () => {
 })
 
 test("throwing conditions fail closed", () => {
-  const policy = { user: { can: [{ resource: "secret", actions: ["read"], condition: () => { throw new Error("boom") } }] } }
+  const policy: AbilityMap = { user: { can: [{ resource: "secret", actions: ["read"], condition: () => { throw new Error("boom") } }] } }
   assert.equal(RoleGuard(policy).can("read", "secret", ["user"], {}).can, false)
   assert.equal(RoleGuard(policy, "boolean").can("read", "secret", ["user"], {}), false)
 })
