@@ -13,6 +13,7 @@
     "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
     "noEmit": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
