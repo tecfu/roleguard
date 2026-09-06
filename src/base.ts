@@ -28,24 +28,16 @@ export default class Base<Context = unknown> {
   protected readonly abilityMap: AbilityMap<Context>
 
   constructor(abilityMap: AbilityMap<Context>) {
-    if (!abilityMap || typeof abilityMap !== "object" || Array.isArray(abilityMap)) {
-      throw new TypeError("abilityMap must be an object")
-    }
+    if (!abilityMap || typeof abilityMap !== "object" || Array.isArray(abilityMap)) throw new TypeError("abilityMap must be an object")
     this.abilityMap = abilityMap
   }
 
   protected validate(requestedAction: string, requestedResource: string, availableRoles: unknown): asserts availableRoles is string[] {
     if (typeof requestedAction !== "string") throw new TypeError("requestedAction must be a string")
     const acceptableActions: Action[] = ["read", "create", "update", "delete"]
-    if (!acceptableActions.includes(requestedAction as Action)) {
-      throw new Error(`requestedAction must be ${acceptableActions.join(",")}`)
-    }
-    if (typeof requestedResource !== "string") {
-      throw new TypeError(`requestedResource must be a string, instead received ${typeof requestedResource}`)
-    }
-    if (!Array.isArray(availableRoles) || !availableRoles.every((role) => typeof role === "string")) {
-      throw new TypeError("availableRoles must be an array of strings")
-    }
+    if (!acceptableActions.includes(requestedAction as Action)) throw new Error(`requestedAction must be ${acceptableActions.join(",")}`)
+    if (typeof requestedResource !== "string") throw new TypeError(`requestedResource must be a string, instead received ${typeof requestedResource}`)
+    if (!Array.isArray(availableRoles) || !availableRoles.every((role) => typeof role === "string")) throw new TypeError("availableRoles must be an array of strings")
   }
 
   protected getRules(role: string, ability: Ability): Rule<Context>[] | null {
@@ -57,17 +49,10 @@ export default class Base<Context = unknown> {
   }
 
   protected matchesRule(rule: Rule<Context>, requestedResource: string, requestedAction: Action, context: Context): boolean {
-    if (!rule || typeof rule !== "object") return false
-    if (rule.resource !== requestedResource) return false
+    if (!rule || typeof rule !== "object" || rule.resource !== requestedResource) return false
     if (!Array.isArray(rule.actions) || !rule.actions.includes(requestedAction)) return false
     if (!Object.prototype.hasOwnProperty.call(rule, "condition")) return true
-    if (typeof rule.condition !== "function") {
-      throw new TypeError(`rule condition value must be a function, ${JSON.stringify(rule)}`)
-    }
-    try {
-      return Boolean(rule.condition(context))
-    } catch {
-      return false
-    }
+    if (typeof rule.condition !== "function") throw new TypeError(`rule condition value must be a function, ${JSON.stringify(rule)}`)
+    try { return Boolean(rule.condition(context)) } catch { return false }
   }
 }
