@@ -15,10 +15,14 @@ export interface RoleRules<Context = unknown> {
 
 export type AbilityMap<Context = unknown> = Record<string, RoleRules<Context>>
 
+export type DecisionRule<Context = unknown> = Omit<Rule<Context>, "condition"> & {
+  condition?: Condition<Context> | string
+}
+
 export interface Decision<Context = unknown> {
   can: boolean
   message: string
-  rule: Record<Ability, Rule<Context>> | null
+  rule: Partial<Record<Ability, DecisionRule<Context>>> | null
   roles: string[]
   requestedAction: Action
   requestedResource: string
