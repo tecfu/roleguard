@@ -82,7 +82,7 @@ test("boolean mode returns only the authorization decision", () => {
 })
 
 test("unknown and inherited role names cannot authorize access", () => {
-  const guard = RoleGuard(abilityMap)
+  const guard = RoleGuard(abilityMap, "boolean")
 
   assert.equal(guard.can("read", "video", ["missing", "toString"], {}), false)
 })
@@ -92,7 +92,7 @@ test("throwing conditions fail closed", () => {
     user: {
       can: [{ resource: "secret", actions: ["read"], condition: () => { throw new Error("boom") } }]
     }
-  })
+  }, "boolean")
 
   assert.equal(guard.can("read", "secret", ["user"], {}), false)
 })
