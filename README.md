@@ -1,80 +1,84 @@
-# Roleguard
+# RoleGuard
 
-A role based access control library with some unconventional options:
+A dependency-free role-based access control library with conditional rules and explanatory authorization decisions.
 
-- Add a conditional validation constraint to an access rule (facilitates more specificity than packages that limit access to roles and their granted actions).
+## Features
 
-- Report which rule granted access.
+- Role-based `can` and `cannot` rules.
+- Explicit deny rules take precedence over grants.
+- Conditional rules for resource-specific authorization.
+- Verbose decisions that identify the matching rule.
+- Boolean mode for callers that only need `true` or `false`.
+- No runtime dependencies.
 
 ## Install
 
-```js
-npm install https://github.com/tecfu/roleguard.git
+```sh
+npm install @tecfu/roleguard
 ```
 
-### Example
+Node.js 18.20 or newer is supported.
+
+## Usage
 
 ```js
-const RoleGuard = require('@tecfu/roleguard')
-// or as ES6 module use
-// import RoleGuard from '@tecfu/roleguard'
+const RoleGuard = require("@tecfu/roleguard")
 
-const AccessRules = {
+const accessRules = {
   user: {
     can: [
       {
-        resource: 'chat',
-        actions: ['update'],
-        condition: (ctx) => {
-          // rule will only positive match if function returns boolean `true`
-          return ctx.request.body.id === ctx.state.jwt.sub.id
-        }
+        resource: "chat",
+        actions: ["update"],
+        condition: (ctx) => ctx.request.body.id === ctx.state.jwt.sub.id
       }
+    ]
+  },
+  banned: {
+    cannot: [
+      { resource: "chat", actions: ["update"] }
     ]
   }
 }
 
-const abilities = RoleGuard(AccessRules)
-const ctx = {
-  request: {
-    body: {
-      id: 2
-    }
-  },
-  state: {
-    jwt: {
-      sub: {
-        id: 2
-      }
-    }
-  }
-}
-const test = abilities.can('update', 'chat', ['user'], ctx)
-console.log(test)
+const guard = RoleGuard(accessRules)
 
-//{
-//  can: true,
-//  message: 'user can update chat subject to rule condition',
-//  rule: {
-//    resource: 'chat',
-//    actions: [ 'update' ],
-//    condition: '(ctx) => {\n' +
-//      '          return ctx.request.body.id === ctx.state.jwt.sub.id\n' +
-//      '        }'
-//  },
-//  roles: [ 'user' ],
-//  requestedAction: 'update',
-//  requestedResource: 'chat'
-//}
+const result = guard.can("update", "chat", ["user"], {
+  request: { body: { id: 2 } },
+  state: { jwt: { sub: { id: 2 } } }
+})
 
+console.log(result.can)     // true
+console.log(result.message) // user can update chat subject to rule condition
 ```
 
-## Test
+The verbose result includes the matched rule, the supplied roles, and the requested action/resource. Conditional functions are represented as strings in the returned `rule` object; the original access-rule definition is never modified.
 
+### Boolean mode
+
+Use boolean mode when the decision details are not needed:
+
+```js
+const guard = RoleGuard(accessRules, "boolean")
+const allowed = guard.can("update", "chat", ["user"], context)
 ```
-npm run-script test
+
+## Rule format
+
+Each role may define `can` and/or `cannot` arrays. A rule has:
+
+- `resource`: resource name.
+- `actions`: one or more of `read`, `create`, `update`, or `delete`.
+- `condition`: optional function receiving the caller-supplied context.
+
+Conditions fail closed when they throw. Invalid condition values are rejected rather than treated as authorization grants.
+
+## Testing
+
+```sh
+npm test
 ```
 
 ## License
 
-GPL 3.0
+GPL-3.0-only

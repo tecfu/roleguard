@@ -1,36 +1,39 @@
 {
   "name": "@tecfu/roleguard",
-  "version": "0.0.1",
-  "description": "An agnostic RBAC library with explanatory decision messages.",
+  "version": "0.1.0",
+  "description": "A dependency-free RBAC library with conditional rules and explanatory decisions.",
   "main": "dist/cjs.js",
-  "module": "src/main.js",
+  "exports": {
+    ".": "./dist/cjs.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE.txt"
+  ],
   "scripts": {
-    "build": "npx rollup --config",
-    "test": "./node_modules/mocha/bin/mocha",
-    "save-test": "./node_modules/mocha/bin/mocha --save",
-    "display-test": "./node_modules/mocha/bin/mocha --display"
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "engines": {
+    "node": ">=18.20"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tecfu/roleguard.git"
   },
   "keywords": [
-    "\"RBAC\"",
-    "\"Authorization",
-    "Library\"",
-    "\"Auth\"",
-    "\"ACL\""
+    "rbac",
+    "authorization",
+    "access-control",
+    "acl",
+    "permissions"
   ],
   "author": "tecfu",
-  "license": "GPL-2.0-only",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/tecfu/roleguard/issues"
   },
-  "homepage": "https://github.com/tecfu/roleguard#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^6.2.0",
-    "rollup": "^1.21.4"
-  }
+  "homepage": "https://github.com/tecfu/roleguard#readme"
 }

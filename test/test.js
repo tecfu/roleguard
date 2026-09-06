@@ -1,167 +1,107 @@
-'use strict';
+"use strict"
 
-const fs = require('fs') 
-const filepath = __dirname+'/test-output.json';
-const chai = require('chai')
-const expect = chai.expect
-const assert = chai.assert
-const should = chai.should()
-const RoleGuard = require(__dirname+'/../dist/cjs.js')
-let testOutput = []
+const test = require("node:test")
+const assert = require("node:assert/strict")
+const RoleGuard = require("../dist/cjs.js")
 
-const AbilityMap = {
+const abilityMap = {
   user: {
     can: [
-      { resource: 'video', actions: ['read'] },
+      { resource: "video", actions: ["read"] },
       {
-        resource: 'video',
-        actions: ['update', 'create', 'delete'],
-        condition: (ctx) => {
-          return ctx.request.body.id === ctx.state.jwt.sub.id
-        }
+        resource: "video",
+        actions: ["update", "create", "delete"],
+        condition: (ctx) => ctx.request.body.id === ctx.state.jwt.sub.id
       }
     ]
   },
   banned: {
-    cannot: [
-      { resource: 'video', actions: ['read'] }
-    ]
+    cannot: [{ resource: "video", actions: ["read"] }]
   },
   subscriber: {
-    can: [
-      { resource: 'video', actions: ['read'] }
-    ]
+    can: [{ resource: "video", actions: ["read"] }]
   },
   promo66: {
-    can: [
-      { resource: 'promo66', actions: ['read'] }
-    ]
+    can: [{ resource: "promo66", actions: ["read"] }]
   }
 }
 
-const verboseMode = RoleGuard(AbilityMap)
+test("verbose mode authorizes a matching rule", () => {
+  const guard = RoleGuard(abilityMap)
+  const result = guard.can("read", "video", ["subscriber"], {})
 
-const ctx = {
-  request: {
-    body: {
-      id: 2
-    }
-  },
-  state: {
-    jwt: {
-      sub: {
-        id: 3
-      }
-    },
-    user: {
-      id: 3,
-      roles: ['user']
-    },
-    meta: {
-      action: "update",
-      resource: "user"
-    }
-  }
-}
-const tests = [ 
-  {
-    resource: 'video',
-    action: 'read',
-    roles: ['public'],
-    data: {}
-  },
-  {
-    resource: 'video',
-    action: 'read',
-    roles: ['subscriber'],
-    data: {}
-  },
-  {
-    resource: 'video',
-    action: 'update',
-    roles: ['user'],
-    data: {
-      request: {
-        body: {
-          id: 2
-        }
-      },
-      state: {
-        jwt: {
-          sub: {
-            id: 3
-          }
-        }
-      }
-    }
-  },
-  {
-    resource: 'video',
-    action: 'update',
-    roles: ['user'],
-    data: {
-      request: {
-        body: {
-          id: 2
-        }
-      },
-      state: {
-        jwt: {
-          sub: {
-            id: 2
-          }
-        }
-      }
-    }
-  },
-  {
-    resource: 'video',
-    action: 'read',
-    roles: ['user', 'subscriber', 'banned'],
-    data: {}
-  },
-  {
-    resource: 'promo66',
-    action: 'read',
-    roles: ['user', 'subscriber', 'banned'],
-    data: {}
-  },
-  {
-    resource: 'promo66',
-    action: 'read',
-    roles: ['promo66'],
-    data: {}
-  }
-
-
-].forEach( (obj, i) => {
-
-  const { action, resource, roles, data, expected } = obj
-  const result = verboseMode.can(action, resource, roles, data)
-
-  switch(true){
-    case(process.argv[2] && process.argv[2] === '--save'):
-    //save test result
-      testOutput.push(result)
-      break;
-    case(process.argv[2] && process.argv[2] === '--display'):
-    //show test results (do nothing)
-      console.log(result)
-      break;
-    default:
-    //run tests
-      //get saved test results
-      let expected = require(filepath);
-      describe(`${action} ${resource} trying role(s): ${roles.join(',')}`,function(){
-        it(`Expected '${expected[i].can}', '${expected[i].message}' and received '${result.can}', '${result.message}'`,function(){
-          expect(result).to.eql(expected[i]);
-        })
-      })
-  }
+  assert.equal(result.can, true)
+  assert.equal(result.message, "subscriber can read video")
+  assert.deepEqual(result.rule.can, abilityMap.subscriber.can[0])
 })
 
-if(process.argv[2] && process.argv[2] === '--save'){
-  //write saved object to file
-  fs.writeFileSync(filepath,JSON.stringify(testOutput,null,2),'utf8');
-  console.log("Tests saved to file.");
-}
+test("explicit cannot rules take precedence", () => {
+  const guard = RoleGuard(abilityMap)
+  const result = guard.can("read", "video", ["subscriber", "banned"], {})
+
+  assert.equal(result.can, false)
+  assert.equal(result.message, "banned cannot read video")
+})
+
+test("conditional rules grant only when the condition matches", () => {
+  const guard = RoleGuard(abilityMap)
+  const denied = guard.can("update", "video", ["user"], {
+    request: { body: { id: 2 } },
+    state: { jwt: { sub: { id: 3 } } }
+  })
+  const allowed = guard.can("update", "video", ["user"], {
+    request: { body: { id: 2 } },
+    state: { jwt: { sub: { id: 2 } } }
+  })
+
+  assert.equal(denied.can, false)
+  assert.equal(allowed.can, true)
+  assert.match(allowed.message, /subject to rule condition$/)
+})
+
+test("verbose results do not mutate the original rule", () => {
+  const condition = abilityMap.user.can[1].condition
+  const guard = RoleGuard(abilityMap)
+
+  const result = guard.can("update", "video", ["user"], {
+    request: { body: { id: 2 } },
+    state: { jwt: { sub: { id: 2 } } }
+  })
+
+  assert.equal(typeof abilityMap.user.can[1].condition, "function")
+  assert.equal(abilityMap.user.can[1].condition, condition)
+  assert.equal(typeof result.rule.can.condition, "string")
+})
+
+test("boolean mode returns only the authorization decision", () => {
+  const guard = RoleGuard(abilityMap, "boolean")
+
+  assert.equal(guard.can("read", "video", ["subscriber"], {}), true)
+  assert.equal(guard.can("read", "video", ["banned"], {}), false)
+  assert.equal(guard.can("read", "promo66", ["subscriber"], {}), false)
+})
+
+test("unknown and inherited role names cannot authorize access", () => {
+  const guard = RoleGuard(abilityMap, "boolean")
+
+  assert.equal(guard.can("read", "video", ["missing", "toString"], {}), false)
+})
+
+test("throwing conditions fail closed", () => {
+  const guard = RoleGuard({
+    user: {
+      can: [{ resource: "secret", actions: ["read"], condition: () => { throw new Error("boom") } }]
+    }
+  }, "boolean")
+
+  assert.equal(guard.can("read", "secret", ["user"], {}), false)
+})
+
+test("invalid requests are rejected", () => {
+  const guard = RoleGuard(abilityMap)
+
+  assert.throws(() => guard.can("list", "video", ["user"], {}), /requestedAction/)
+  assert.throws(() => guard.can("read", 42, ["user"], {}), /requestedResource/)
+  assert.throws(() => guard.can("read", "video", "user", {}), /availableRoles/)
+  assert.throws(() => RoleGuard(null), /abilityMap/)
+})
