@@ -1,39 +1,39 @@
 {
   "name": "@tecfu/roleguard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A dependency-free RBAC library with conditional rules and explanatory decisions.",
-  "main": "dist/cjs.js",
+  "type": "module",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "exports": {
-    ".": "./dist/cjs.js"
+    ".": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js",
+      "default": "./dist/main.js"
+    }
   },
-  "files": [
-    "dist",
-    "src",
-    "README.md",
-    "LICENSE.txt"
-  ],
+  "files": ["dist", "README.md", "LICENSE.txt"],
   "scripts": {
-    "test": "node --test",
-    "test:watch": "node --test --watch"
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && node --test test/test.ts",
+    "test:watch": "node --test --watch test/test.ts",
+    "prepublishOnly": "npm run build && npm test"
   },
   "engines": {
-    "node": ">=18.20"
+    "node": ">=22.18"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tecfu/roleguard.git"
   },
-  "keywords": [
-    "rbac",
-    "authorization",
-    "access-control",
-    "acl",
-    "permissions"
-  ],
+  "keywords": ["rbac", "authorization", "access-control", "acl", "permissions"],
   "author": "tecfu",
   "license": "GPL-3.0-only",
-  "bugs": {
-    "url": "https://github.com/tecfu/roleguard/issues"
-  },
-  "homepage": "https://github.com/tecfu/roleguard#readme"
+  "bugs": { "url": "https://github.com/tecfu/roleguard/issues" },
+  "homepage": "https://github.com/tecfu/roleguard#readme",
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2"
+  }
 }
