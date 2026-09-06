@@ -1,4 +1,4 @@
-import Base, { type Ability, type Action, type Decision, type Rule } from "./base.ts"
+import Base, { type Ability, type Action, type Decision, type DecisionRule, type Rule } from "./base.ts"
 
 export default class VerboseMode<Context = unknown> extends Base<Context> {
   can(requestedAction: Action, requestedResource: string, availableRoles: string[], context: Context): Decision<Context> {
@@ -20,13 +20,13 @@ export default class VerboseMode<Context = unknown> extends Base<Context> {
   }
 
   private createDecision(can: boolean, ability: Ability, role: string, matchedRule: Rule<Context>, requestedAction: Action, requestedResource: string, roles: string[]): Decision<Context> {
-    const rule = { ...matchedRule }
+    const rule: DecisionRule<Context> = { ...matchedRule }
     const hasCondition = Object.prototype.hasOwnProperty.call(matchedRule, "condition")
-    if (hasCondition && typeof rule.condition === "function") rule.condition = rule.condition.toString() as unknown as Rule<Context>["condition"]
+    if (hasCondition && typeof rule.condition === "function") rule.condition = rule.condition.toString()
     return {
       can,
       message: hasCondition ? `${role} ${ability} ${requestedAction} ${requestedResource} subject to rule condition` : `${role} ${ability} ${requestedAction} ${requestedResource}`,
-      rule: { [ability]: rule } as Record<Ability, Rule<Context>>,
+      rule: { [ability]: rule },
       roles,
       requestedAction,
       requestedResource
