@@ -18,7 +18,7 @@ test("verbose mode authorizes a matching rule", () => {
   const result = RoleGuard(abilityMap).can("read", "video", ["subscriber"], {})
   assert.equal(result.can, true)
   assert.equal(result.message, "subscriber can read video")
-  assert.deepEqual(result.rule!.can, abilityMap.subscriber.can![0])
+  assert.deepEqual(result.rule!.can!, abilityMap.subscriber!.can![0])
 })
 
 test("explicit cannot rules take precedence", () => {
@@ -37,10 +37,10 @@ test("conditional rules grant only when the condition matches", () => {
 })
 
 test("verbose results do not mutate the original rule", () => {
-  const condition = abilityMap.user.can![1].condition
+  const condition = abilityMap.user!.can![1]!.condition
   const result = RoleGuard(abilityMap).can("update", "video", ["user"], { request: { body: { id: 2 } }, state: { jwt: { sub: { id: 2 } } } })
-  assert.equal(abilityMap.user.can![1].condition, condition)
-  assert.equal(typeof result.rule!.can.condition, "string")
+  assert.equal(abilityMap.user!.can![1]!.condition, condition)
+  assert.equal(typeof result.rule!.can!.condition, "string")
 })
 
 test("boolean mode returns only the authorization decision", () => {
