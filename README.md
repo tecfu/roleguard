@@ -1,6 +1,6 @@
 # RoleGuard
 
-A dependency-free role-based access control library with conditional rules and explanatory authorization decisions.
+A dependency-free, TypeScript-first role-based access control library with conditional rules and explanatory authorization decisions.
 
 ## Features
 
@@ -9,6 +9,7 @@ A dependency-free role-based access control library with conditional rules and e
 - Conditional rules for resource-specific authorization.
 - Verbose decisions that identify the matching rule.
 - Boolean mode for callers that only need `true` or `false`.
+- Strict TypeScript types with generated declaration files.
 - No runtime dependencies.
 
 ## Install
@@ -17,53 +18,46 @@ A dependency-free role-based access control library with conditional rules and e
 npm install @tecfu/roleguard
 ```
 
-Node.js 18.20 or newer is supported.
+Node.js 22.18+ is required. Node 22.18 introduced built-in TypeScript type stripping, which this project uses for its test suite.
 
 ## Usage
 
-```js
-const RoleGuard = require("@tecfu/roleguard")
+```ts
+import RoleGuard from "@tecfu/roleguard"
+import type { AbilityMap } from "@tecfu/roleguard"
 
-const accessRules = {
+type Context = { userId: number }
+
+const accessRules: AbilityMap<Context> = {
   user: {
     can: [
       {
         resource: "chat",
         actions: ["update"],
-        condition: (ctx) => ctx.request.body.id === ctx.state.jwt.sub.id
+        condition: (ctx) => ctx.userId === 42
       }
     ]
   },
   banned: {
-    cannot: [
-      { resource: "chat", actions: ["update"] }
-    ]
+    cannot: [{ resource: "chat", actions: ["update"] }]
   }
 }
 
 const guard = RoleGuard(accessRules)
-
-const result = guard.can("update", "chat", ["user"], {
-  request: { body: { id: 2 } },
-  state: { jwt: { sub: { id: 2 } } }
-})
+const result = guard.can("update", "chat", ["user"], { userId: 42 })
 
 console.log(result.can)     // true
 console.log(result.message) // user can update chat subject to rule condition
 ```
 
-The verbose result includes the matched rule, the supplied roles, and the requested action/resource. Conditional functions are represented as strings in the returned `rule` object; the original access-rule definition is never modified.
-
 ### Boolean mode
 
-Use boolean mode when the decision details are not needed:
-
-```js
+```ts
 const guard = RoleGuard(accessRules, "boolean")
-const allowed = guard.can("update", "chat", ["user"], context)
+const allowed = guard.can("update", "chat", ["user"], { userId: 42 })
 ```
 
-## Rule format
+### Rule format
 
 Each role may define `can` and/or `cannot` arrays. A rule has:
 
@@ -73,11 +67,15 @@ Each role may define `can` and/or `cannot` arrays. A rule has:
 
 Conditions fail closed when they throw. Invalid condition values are rejected rather than treated as authorization grants.
 
-## Testing
+## Development
 
 ```sh
+npm install
 npm test
+npm run build
 ```
+
+The build emits JavaScript and `.d.ts` declarations into `dist/`. TypeScript source lives entirely under `src/` and `test/`; no hand-written JavaScript is required.
 
 ## License
 
